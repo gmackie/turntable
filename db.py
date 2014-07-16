@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -7,7 +7,7 @@ from sqlalchemy.schema import Column
 from sqlalchemy.types import DateTime, Integer, Unicode
 
 engine = create_engine('postgresql:///turntable')
-session = scoped_session(sessionmaker((bind=engine, autoflush=False))
+session = scoped_session(sessionmaker(bind=engine, autoflush=False))
 
 Base = declarative_base(bind=engine)
 
@@ -20,7 +20,7 @@ class Song(Base):
     title = Column(Unicode, nullable=False)
     song_title = Column(Unicode, nullable=False)
     artist = Column(Unicode, nullable=False)
-    hash = Column(Unicode, nullable=False)
+    yt_hash = Column(Unicode, nullable=False)
     last_played = Column(DateTime, nullable=True)
     added_on = Column(DateTime, nullable=False, index=True)
 

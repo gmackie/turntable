@@ -1,19 +1,15 @@
 import psycopg2
 
 import time
+import db
 from flask import Flask
 from flask.ext.restful import reqparse, abort, Api, Resource
 from youtube_dl import YoutubeDL
-#from youtube_dl import (
-#    AtomicParsleyPP,
-#    FFmpegAudioFixPP,
-#    FFmpegMetadataPP,
-#    FFmpegVideoConvertor,
-#    FFmpegExtractAudioPP,
-#    FFmpegEmbedSubtitlePP,
-#    XAttrMetadataPP,
-#)
 from youtube_dl import FFmpegExtractAudioPP
+import boto
+import boto.s3.connection
+from boto.s3.key import Key
+
 
 ydl = YoutubeDL({
   'outtmpl': '%(id)s.%(ext)s',
@@ -22,21 +18,14 @@ ydl = YoutubeDL({
 ydl.add_default_info_extractors()
 ydl.add_post_processor(FFmpegExtractAudioPP(preferredcodec='mp3', preferredquality='5', nopostoverwrites=False))
 
-try:
-    conn = psycopg2.connect("dbname='turntable' user='tester' host='localhost' password='test'", cursor_factory=DictCursor)
-except:
-    print "I am unable to connect"
-app = Flask(turntable)
+app = Flask(__name__)
 api = Api(app)
 
-songs = {
-    'bw9CALKOvAI': {'title': 'Bubble Pop! - HYUNA (OFFICIAL MUSIC VIDEO)'},
-    'G6JppjQSTh8': {'title': 'CHANGE - Some other KPop'},
-}
+conn = boto.connect_s3()
+bucket = conn.get_bucket('turntable.dongs.in')
 
 
 def abort_if_song_doesnt_exist(song_id):
-    if song_id not in songs:
         abort(404, message="song {} doesn't exist".format(song_id))
 
 parser = reqparse.RequestParser()
@@ -48,29 +37,20 @@ parser.add_argument('hash', type=str)
 class Song(Resource):
     def get(self, song_id):
         args = parser.parse_args()
-        song_id = args['hash']
-        cur = conn.cursor()
-        cur.execute("""SELECT * from songs""")
-        rows = cur.fetchall()
-        song_exists = False
-        for row in rows:
-            if row['hash']  == args['hash']:
-                song_exists = True
-                song = {
-                    'hash': row['hash'],
-                    'title': row['title'],
-                    'song_title': row['song_title'],
-                    'artist': row['artist'],
-                    'added_on': row['added_on'],
-                }
-        if not song_exists
-            abort(404, message="error song {} not in db!".format(song_id)
-        return song
+        song = db.session.query(db.Song).filter(db.Song.yt_hash == song_id).first()
+        url = key.generate_url(0, query_auth=False, force_http=True)
+        if song is None:
+            abort(404, message="error song {} not in db!".format(song_id))
+        ret_song = {
+            'title': song.title,
+            'song_title': song.song_title,
+            'artist': song.artist,
+            'yt_hash': song.yt_hash,
+            'url': url,
+        }
+        
+        return ret_song, 200
 
-    def delete(self, song_id):
-        abort_if_song_doesnt_exist(song_id)
-        del songs[song_id]
-        return '', 204
 
     def put(self, song_id):
         args = parser.parse_args()
@@ -79,7 +59,6 @@ class Song(Resource):
             'artist': args['artist'],
             'length': args['length'],
         }
-        songs[song_id] = song
         return song, 201
 
 
@@ -87,38 +66,48 @@ class Song(Resource):
 #   shows a list of all todos, and lets you POST to add new tasks
 class SongList(Resource):
     def get(self):
-        return songs
+        songs = db.session.query(db.Song)
+        ret_songs = []
+        for song in songs:
+            key = bucket.get_key(song.yt_hash + '.mp3')
+            url = key.generate_url(0, query_auth=False, force_http=True)
+            ret_song = {
+                'title': song.title,
+                'song_title': song.song_title,
+                'artist': song.artist,
+                'yt_hash': song.yt_hash,
+                'url': url,
+            }
+            ret_songs.append(ret_song)
+        return ret_songs
 
     def post(self):
         args = parser.parse_args()
         song_id = args['hash']
-        cur = conn.cursor()
-        cur.execute("""SELECT * from songs""")
-        rows = cur.fetchall()
-        song_exists = False
-        for row in rows:
-            
-            
-            if row['hash']  == args['hash']:
-                song_exists = True
-                song = {
-                    'hash': row['hash'],
-                    'title': row['title'],
-                    'song_title': row['song_title'],
-                    'artist': row['artist'],
-                    'added_on': row['added_on'],
-                }
-        if not song_exists:        
+        song = db.session.query(db.Song).filter(db.Song.yt_hash == args['hash']).first()
+        if song is None:
             info = ydl.extract_info('http://www.youtube.com/watch?v=' + args['hash'],  download=True)
-            song = {
-                'hash': args['hash'],
-                'title': info['title'],
-                'song_title': '',
-                'artist': '',
-                'added_on': time.time(),
-            }
-            cursor.executemany("""INSERT INTO songs(hash, title, song_title, artist, added_on) VALUES (%(hash)s, %(title)s, %(song_title)s, %(artist), %(added_on)s)""", song)
-        return song, 201
+            song = db.Song( 
+                title=info['title'],
+                song_title='',
+                artist='',
+                yt_hash=args['hash'],
+            )
+            db.session.add(song)
+            db.session.commit()
+            k = Key(bucket)
+            k.key = args['hash'] + '.mp3'
+            k.set_contents_from_filename(args['hash'] + '.mp3')
+            url = k.generate_url(0, query_auth=False, force_http=True)
+            ret_song = {
+            'title': song.title,
+            'song_title': song.song_title,
+            'artist': song.artist,
+            'yt_hash': song.yt_hash,
+            'url': url,
+        }
+        
+        return ret_song, 201
 
 ##
 ## Actually setup the Api resource routing here
@@ -129,4 +118,5 @@ api.add_resource(Song, '/songs/<string:song_id>')
 @app.teardown_request
 def shutdown_session(exception=None):
       db.session.remove()
-
+if __name__ == '__main__':
+      app.run(debug=True)
