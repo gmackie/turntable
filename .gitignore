@@ -1,3 +1,7 @@
+error.log
+access.log
+*/error.log
+*/access.log
 .*
 dotfiles/
 *.mp3
