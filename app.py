@@ -311,6 +311,33 @@ class RoomList(Resource):
         
         return ret_room, 201
 
+class DJList(Resource):
+    def get(self, room):
+        ret_users = []
+        users = r.lrange("room:%s:djlist" % room, 0, -1)
+        for username in users:
+            plays = r.hget("user:%s" % username, "plays")
+            points = r.hget("user:%s" % username, "points")
+            skips = r.hget("user:%s" % username, "skips")
+            created_on = r.hget("user:%s" % username, "created_on")
+            next_song = r.lindex("user:%s:queue" % username, -1)
+            ret_user = {
+                'username': username,
+                'created_on': created_on,
+                'plays': plays,
+                'points': points,
+                'skips': skips,
+                'next_song': next_song,
+            }
+            ret_users.append(ret_users)
+        return ret_users
+
+    def post(self):
+        ret = {
+            'error': 'not implemented',
+        }
+        return ret, 500
+
 class Skip(Resource):
     def post(self, room):
         args = parser.parse_args()
@@ -405,6 +432,7 @@ api.add_resource(User, '/api/users/<string:username>')
 api.add_resource(Queue, '/api/users/<string:username>/queue')
 api.add_resource(RoomList, '/api/rooms')
 api.add_resource(Room, '/api/rooms/<string:room>')
+api.add_resource(DJList, '/api/rooms/<string:room>/djlist')
 api.add_resource(Skip, '/api/rooms/<string:room>/skip')
 api.add_resource(Join, '/api/rooms/<string:room>/join')
 api.add_resource(Leave, '/api/rooms/<string:room>/leave')
