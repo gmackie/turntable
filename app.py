@@ -90,7 +90,7 @@ class SongList(Resource):
         song_id = args['hash']
         if r.sadd("songs", song_id):
             info = ydl.extract_info('http://www.youtube.com/watch?v=' + args['hash'],  download=True)
-            
+            print song_id
             r.hset("song:%s" % song_id, "title", info['title'])
             r.hset("song:%s" % song_id, "song_title", '')
             r.hset("song:%s" % song_id, "artist", '')
@@ -224,10 +224,12 @@ class Queue(Resource):
     def post(self, username):
         args = parser.parse_args()
         song_id = args['hash']
+        title = r.hget("song:%s" % song_id, "title")
         username = username
 
         if r.lpush("queue:%s" % username, song_id):
             ret = {
+            'title': title,
             'song': song_id,
             'added': 1,
             }
@@ -376,16 +378,16 @@ class Leave(Resource):
 ##
 ## Actually setup the Api resource routing here
 ##
-api.add_resource(SongList, '/songs')
-api.add_resource(Song, '/songs/<string:song_id>')
-api.add_resource(UserList, '/users')
-api.add_resource(User, '/users/<string:username>')
-api.add_resource(Queue, '/users/<string:username>/queue')
-api.add_resource(RoomList, '/rooms')
-api.add_resource(Room, '/rooms/<string:room>')
-api.add_resource(Skip, '/rooms/<string:room>/skip')
-api.add_resource(Join, '/rooms/<string:room>/join')
-api.add_resource(Leave, '/rooms/<string:room>/leave')
+api.add_resource(SongList, '/api/songs')
+api.add_resource(Song, '/api/songs/<string:song_id>')
+api.add_resource(UserList, '/api/users')
+api.add_resource(User, '/api/users/<string:username>')
+api.add_resource(Queue, '/api/users/<string:username>/queue')
+api.add_resource(RoomList, '/api/rooms')
+api.add_resource(Room, '/api/rooms/<string:room>')
+api.add_resource(Skip, '/api/rooms/<string:room>/skip')
+api.add_resource(Join, '/api/rooms/<string:room>/join')
+api.add_resource(Leave, '/api/rooms/<string:room>/leave')
 
 if __name__ == '__main__':
       app.run(debug=True)
