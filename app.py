@@ -1,4 +1,6 @@
+import psutil
 import os
+import signal
 import time
 from hashlib import md5
 from flask import Flask
@@ -308,7 +310,12 @@ class Skip(Resource):
         args = parser.parse_args()
         username = args['username']
         song_id = r.hget("room:%s" % room, "current_song")
-        
+        didSkip = False
+        if (didSkip):
+            for proc in psutil.process_iter():
+                if proc.name() == 'ices':
+                    os.kill(proc.pid, signal.SIGUSR1)		
+            
         ret= {
             'song': song_id,
             'numSkips': skips,
