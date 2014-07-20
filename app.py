@@ -321,8 +321,9 @@ class Skip(Resource):
         print req_skips
         print skips
         print (skips >= req_skips)
-        if (skips >= req_skips):
-            print "skipping"
+        print (int(req_skips) <= int(skips))
+        did_skip = (int(req_skips) <= int(skips))
+        if (did_skip):
             for proc in psutil.process_iter():
                 if proc.name() == 'ices':
                     os.kill(proc.pid, signal.SIGUSR1)		
