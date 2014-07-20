@@ -318,7 +318,7 @@ class Skip(Resource):
         song_id = r.hget("room:%s" % room, "current_song")
         req_skips = r.hget("room:%s" % room, "req_skips")
         skips = r.hincrby("room:%s" % room, "skips", 1)
-        did_skip = (req_skips <= skips)
+        did_skip = (skips >= req_skips)
         if (did_skip):
             for proc in psutil.process_iter():
                 if proc.name() == 'ices':
