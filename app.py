@@ -327,8 +327,8 @@ class Skip(Resource):
         ret= {
             'song': song_id,
             'didSkip': did_skip,
-            'numSkips': skips,
-            'reqSkips': req_skips,
+            'skips': skips,
+            'req_skips': req_skips,
         }
         return ret, 200
 
