@@ -310,14 +310,18 @@ class Skip(Resource):
         args = parser.parse_args()
         username = args['username']
         song_id = r.hget("room:%s" % room, "current_song")
-        didSkip = False
+        reqSkips = r.hget("room:%s" % room, "req_skips")
+        skips = r.hincrby("room:%s" % room, "skips", 1)
+        didSkip = (reqSkips >= skips)
         if (didSkip):
+            r.hset("room:%s" % room, "skips", 0)
             for proc in psutil.process_iter():
                 if proc.name() == 'ices':
                     os.kill(proc.pid, signal.SIGUSR1)		
             
         ret= {
             'song': song_id,
+            'didSkip': didSkip,
             'numSkips': skips,
             'reqSkips': reqSkips,
         }
