@@ -1,3 +1,4 @@
+import os
 import time
 from hashlib import md5
 from flask import Flask
@@ -100,7 +101,7 @@ class SongList(Resource):
             k.key = args['hash'] + '.mp3'
             k.set_contents_from_filename(args['hash'] + '.mp3')
             url = k.generate_url(0, query_auth=False, force_http=True)
-            
+            os.remove(k.key)
             r.set("song:%s:url" % song_id, url)
             
             ret_song = {
