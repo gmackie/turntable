@@ -34,7 +34,7 @@ def ices_get_next ():
     
     r.lpush("djlist:%s" % room, username)
     r.lpush("queue:%s" % username, song_hash)
-    return "/home/mackieg/dev/turntable/music/%s.mp3" % song_hash
+    return "/home/ices/music/%s.mp3" % song_hash
 # This function, if defined, returns the string you'd like used
 # as metadata (ie for title streaming) for the current song. You may
 # return null to indicate that the file comment should be used.
