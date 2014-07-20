@@ -11,7 +11,7 @@
     <Type>python</Type>
     <!-- Module name to pass to the playlist handler if using  perl or python.
 	 If you use the builtin playlist handler then this is ignored -->
-    <Module>ices</Module>
+    <Module>playlist</Module>
     <!-- Set this to the number of seconds to crossfade between tracks.
          Leave out or set to zero to disable crossfading (the default).
     <Crossfade>5</Crossfade>
@@ -35,9 +35,9 @@
       <!-- Hostname or ip of the icecast server you want to connect to -->
       <Hostname>localhost</Hostname>
       <!-- Port of the same -->
-      <Port>8000</Port>
+      <Port>8002</Port>
       <!-- Encoder password on the icecast server -->
-      <Password>hackme</Password>
+      <Password>turntablesex1</Password>
       <!-- Header protocol to use when communicating with the server.
            Shoutcast servers need "icy", icecast 1.x needs "xaudiocast", and
 	   icecast 2.x needs "http". -->
