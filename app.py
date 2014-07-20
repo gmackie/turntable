@@ -319,7 +319,9 @@ class Skip(Resource):
         req_skips = r.hget("room:%s" % room, "req_skips")
         skips = r.hincrby("room:%s" % room, "skips", 1)
         did_skip = (skips >= req_skips)
+        print did_skip
         if (did_skip):
+            print "skipping"
             for proc in psutil.process_iter():
                 if proc.name() == 'ices':
                     os.kill(proc.pid, signal.SIGUSR1)		
