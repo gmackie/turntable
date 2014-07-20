@@ -28,6 +28,7 @@ def ices_get_next ():
     artist = r.hget("song:%s" % song_hash, "artist")
     
     r.hset("room:%s" % room, "current_song", song_hash)
+    r.hset("room:%s" % room, "skips", 0)
 
     print("Song Title: " + title) 
     r.lpush("djlist:%s" % room, username)

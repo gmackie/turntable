@@ -249,6 +249,7 @@ class Room(Resource):
             current_song = r.hget("room:%s:" % room, "current_song")
             favorite_song = r.hget("room:%s" % room, "favorite_song")
             created_on = r.hget("room:%s" % room, "created_on")
+            req_skips = r.hget("room:%s" % room, "req_skips")
             
             ret_room = {
                 'room': room,
@@ -256,6 +257,7 @@ class Room(Resource):
                 'created_on': created_on,
                 'current_song': current_song,
                 'favorite_song': favorite_song,
+                'req_skips': req_skips,
             }
         else:
             abort(404, message="error song {} not in db!".format(song_id))
@@ -271,6 +273,7 @@ class RoomList(Resource):
             current_song = r.hget("room:%s:" % room, "current_song")
             favorite_song = r.hget("room:%s" % room, "favorite_song")
             created_on = r.hget("room:%s" % room, "created_on")
+            req_skips = r.hget("room:%s" % room, "req_skips")
             
             ret_room = {
                 'room': room,
@@ -278,6 +281,7 @@ class RoomList(Resource):
                 'created_on': created_on,
                 'current_song': current_song,
                 'favorite_song': favorite_song,
+                'req_skips': req_skips,
             }
             ret_rooms.append(ret_room)
         return ret_rooms
@@ -292,6 +296,7 @@ class RoomList(Resource):
             r.hset("room:%s" % room, "users", 0)
             r.hset("room:%s" % room, "current_song", '')
             r.hset("room:%s" % room, "favorite_song", '')
+            r.hset("room:%s" % room, "req_skips", 2)
                 
             ret_room = {
                 'room': room,
@@ -299,6 +304,7 @@ class RoomList(Resource):
                 'created_on': timestamp,
                 'current_song': '',
                 'favorite_song': '',
+                'req_skips': req_skips,
             }
         else:
             abort(404, message="{'error': 'user {} already in db'}".format(room))
@@ -310,20 +316,19 @@ class Skip(Resource):
         args = parser.parse_args()
         username = args['username']
         song_id = r.hget("room:%s" % room, "current_song")
-        reqSkips = r.hget("room:%s" % room, "req_skips")
+        req_skips = r.hget("room:%s" % room, "req_skips")
         skips = r.hincrby("room:%s" % room, "skips", 1)
-        didSkip = (reqSkips >= skips)
-        if (didSkip):
-            r.hset("room:%s" % room, "skips", 0)
+        did_skip = (req_skips >= skips)
+        if (did_skip):
             for proc in psutil.process_iter():
                 if proc.name() == 'ices':
                     os.kill(proc.pid, signal.SIGUSR1)		
             
         ret= {
             'song': song_id,
-            'didSkip': didSkip,
+            'didSkip': did_skip,
             'numSkips': skips,
-            'reqSkips': reqSkips,
+            'reqSkips': req_skips,
         }
         return ret, 200
 
