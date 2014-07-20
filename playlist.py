@@ -22,16 +22,14 @@ def ices_shutdown ():
 def ices_get_next ():
     print 'Executing get_next() function...'
     username = r.rpop("djlist:%s" % room)
-    print username
     song_hash = r.rpop("queue:%s" % username)
-    print song_hash
     title = r.hget("song:%s" % song_hash, "title")
     song_title = r.hget("song:%s" % song_hash, "song_title")
     artist = r.hget("song:%s" % song_hash, "artist")
     
     r.hset("room:%s" % room, "current_song", song_hash)
 
-    
+    print("Song Title: " + title) 
     r.lpush("djlist:%s" % room, username)
     r.lpush("queue:%s" % username, song_hash)
     return "/home/ices/music/%s.mp3" % song_hash
@@ -39,6 +37,11 @@ def ices_get_next ():
 # as metadata (ie for title streaming) for the current song. You may
 # return null to indicate that the file comment should be used.
 def ices_get_metadata ():
+    song_hash = r.hget("room:%s" % room, "current_song")
+    title = r.hget("song:%s" % song_hash, "title")
+    song_title = r.hget("song:%s" % song_hash, "song_title")
+    artist = r.hget("song:%s" % song_hash, "artist")
+
     if song_title != '':
         metadata = song_title + " - " + artist
     else:
