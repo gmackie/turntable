@@ -320,6 +320,7 @@ class Skip(Resource):
         skips = r.hincrby("room:%s" % room, "skips", 1)
         print req_skips
         print skips
+        print (skips >= req_skips)
         if (skips >= req_skips):
             print "skipping"
             for proc in psutil.process_iter():
