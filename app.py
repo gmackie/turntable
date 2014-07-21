@@ -330,7 +330,7 @@ class DJList(Resource):
                 'skips': skips,
             }
             ret_users.append(ret_users)
-        return ret_users
+        return ret_users, 200
 
     def post(self):
         ret = {
