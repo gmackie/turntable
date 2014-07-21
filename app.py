@@ -320,7 +320,7 @@ class DJList(Resource):
             points = r.hget("user:%s" % username, "points")
             skips = r.hget("user:%s" % username, "skips")
             created_on = r.hget("user:%s" % username, "created_on")
-            next_song = r.lindex("user:%s:queue" % username, -1)
+            next_song = r.lindex("queue:%s" % username, -1)
             ret_user = {
                 'username': username,
                 'created_on': created_on,
