@@ -314,7 +314,7 @@ class RoomList(Resource):
 class DJList(Resource):
     def get(self, room):
         ret_users = []
-        users = r.lrange("room:%s:djlist" % room, 0, -1)
+        users = r.lrange("djlist:%s" % room, 0, -1)
         for username in users:
             plays = r.hget("user:%s" % username, "plays")
             points = r.hget("user:%s" % username, "points")
