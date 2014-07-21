@@ -31,7 +31,8 @@ def ices_get_next ():
     r.hset("room:%s" % room, "skips", 0)
 
     print("Song Title: " + title) 
-    r.lpush("djlist:%s" % room, username)
+    if sismember("djset:%s" % room):
+        r.lpush("djlist:%s" % room, username)
     r.lpush("queue:%s" % username, song_hash)
     return "/home/ices/music/%s.mp3" % song_hash
 # This function, if defined, returns the string you'd like used
