@@ -329,7 +329,7 @@ class DJList(Resource):
                 'points': points,
                 'skips': skips,
             }
-            ret_users.append(ret_users)
+            ret_users.append(ret_user)
         ret = {
             'users': ret_users,
         }
