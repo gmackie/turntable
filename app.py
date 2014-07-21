@@ -333,6 +333,7 @@ class DJList(Resource):
         ret = {
             'users': ret_users,
         }
+        print ret
         return ret, 200
 
     def post(self):
