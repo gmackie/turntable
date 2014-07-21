@@ -324,10 +324,10 @@ class DJList(Resource):
             ret_user = {
                 'username': username,
                 'created_on': created_on,
+                'next_song': next_song,
                 'plays': plays,
                 'points': points,
                 'skips': skips,
-                'next_song': next_song,
             }
             ret_users.append(ret_users)
         return ret_users
