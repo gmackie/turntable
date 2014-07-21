@@ -350,9 +350,6 @@ class Skip(Resource):
         song_id = r.hget("room:%s" % room, "current_song")
         req_skips = r.hget("room:%s" % room, "req_skips")
         skips = r.hincrby("room:%s" % room, "skips", 1)
-        print req_skips
-        print skips
-        print (skips >= req_skips)
         print (int(req_skips) <= int(skips))
         did_skip = (int(req_skips) <= int(skips))
         if (did_skip):
