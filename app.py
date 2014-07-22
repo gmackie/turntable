@@ -371,6 +371,7 @@ class Join(Resource):
         if r.sismember("rooms", room):
             if r.sismember("users", username):
                 r.sadd("djset:%s" % room, username) 
+                r.sadd("djwaitset:%s" % room, username) 
                 numDj = r.lpush("djlist:%s" % room, username)
                 ret= {
                     'room': room,
@@ -401,6 +402,7 @@ class Leave(Resource):
         username = args['username']
         if r.sismember("rooms", room):
             if r.sismember("djset:%s" % room, username):
+                r.srem("djwaitset:%s" % room, username) 
                 r.srem("djset:%s" % room, username) 
                 ret= {
                     'room': room,
