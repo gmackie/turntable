@@ -25,7 +25,7 @@ def ices_get_next ():
         username = r.rpop("djlist:%s" % room)
         song_hash = r.rpop("queue:%s" % username)
         
-        r.zincrby("user:%s:plays" % username, 1, song_hash) 
+        r.zincrby("user:%s:plays" % username, song_hash) 
         
         new_user = r.srandmember("djset:%s" % room)
         r.lpush("djlist:%s" % new_user)
@@ -37,7 +37,7 @@ def ices_get_next ():
     song_title = r.hget("song:%s" % song_hash, "song_title")
     artist = r.hget("song:%s" % song_hash, "artist")
     
-    r.zincrby("room:%s:plays" % room, 1, song_hash) 
+    r.zincrby("room:%s:plays" % room, song_hash) 
     r.hset("room:%s" % room, "current_song", song_hash)
     r.hset("room:%s" % room, "skips", 0)
 
