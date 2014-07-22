@@ -22,13 +22,14 @@ def ices_shutdown ():
 def ices_get_next ():
     print 'Executing get_next() function...'
     if r.scard("djset:%s" % room) > 0:
+        new_user = r.srandmember("djset:%s" % room)
+        r.lpush("djlist:%s" % new_user)
+
         username = r.rpop("djlist:%s" % room)
         song_hash = r.rpop("queue:%s" % username)
         
         r.zincrby("user:%s:plays" % username, song_hash) 
         
-        new_user = r.srandmember("djset:%s" % room)
-        r.lpush("djlist:%s" % new_user)
     else:
         print 'No one available to DJ'
         print 'Choosing random song.....'
