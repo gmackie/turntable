@@ -21,18 +21,26 @@ def ices_shutdown ():
 # Should return a string.
 def ices_get_next ():
     print 'Executing get_next() function...'
-    username = r.rpop("djlist:%s" % room)
-    song_hash = r.rpop("queue:%s" % username)
+    if r.scard("djset:%s" % room) > 0:
+        username = r.rpop("djlist:%s" % room)
+        song_hash = r.rpop("queue:%s" % username)
+        
+        r.zincrby("user:%s:plays" % username, 1, song_hash) 
+        
+        new_user = r.srandmember("djset:%s" % room)
+        r.lpush("djlist:%s" % new_user)
+    else:
+        print 'No one available to DJ'
+        print 'Choosing random song.....'
+        song_hash = r.srandmember("songs")
     title = r.hget("song:%s" % song_hash, "title")
     song_title = r.hget("song:%s" % song_hash, "song_title")
     artist = r.hget("song:%s" % song_hash, "artist")
     
+    r.zincrby("room:%s:plays" % room, 1, song_hash) 
     r.hset("room:%s" % room, "current_song", song_hash)
     r.hset("room:%s" % room, "skips", 0)
 
-    if r.sismember("djset:%s" % room, username):
-        r.lpush("djlist:%s" % room, username)
-    r.lpush("queue:%s" % username, song_hash)
     return "/home/ices/music/%s.mp3" % song_hash
 # This function, if defined, returns the string you'd like used
 # as metadata (ie for title streaming) for the current song. You may
