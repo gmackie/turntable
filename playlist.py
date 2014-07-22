@@ -31,9 +31,9 @@ def ices_get_next ():
         print "playing song for user: " + username
         
         r.zincrby("user:%s:plays" % username, song_hash) 
-        if r.sismember("djset:%s" % room):
+        if not r.sismember("djset:%s" % room, username):
             print "user : " + username + " has left the room while dj'ing!"
-        elif r.llen("queue:%s" username) > 0:
+        elif r.llen("queue:%s" % username) > 0:
             print "keeping user: " + username + " : has queue"
             r.lpush("djlist:%s" % room, username)
         else:
