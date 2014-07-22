@@ -23,7 +23,7 @@ def ices_get_next ():
     print 'Executing get_next() function...'
     if r.scard("djset:%s" % room) > 0:
         new_user = r.srandmember("djset:%s" % room)
-        r.lpush("djlist:%s" % new_user)
+        r.lpush("djlist:%s" % room, new_user)
 
         username = r.rpop("djlist:%s" % room)
         song_hash = r.rpop("queue:%s" % username)
