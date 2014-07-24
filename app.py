@@ -15,7 +15,7 @@ from boto.s3.key import Key
 
 ydl = YoutubeDL({
   'outtmpl': '%(id)s.%(ext)s',
-  'format': 'bestaudio/best'
+  'format': 'bestaudio/best',
   'verbose': 'yes'
   })
 ydl.add_default_info_extractors()
