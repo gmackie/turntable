@@ -92,29 +92,39 @@ class SongList(Resource):
     def post(self):
         args = parser.parse_args()
         song_id = args['hash']
-        if r.sadd("songs", song_id):
-            info = ydl.extract_info('http://www.youtube.com/watch?v=' + args['hash'],  download=True)
-            print song_id
-            r.hset("song:%s" % song_id, "title", info['title'])
-            r.hset("song:%s" % song_id, "song_title", '')
-            r.hset("song:%s" % song_id, "artist", '')
-            r.hset("song:%s" % song_id, "yt_hash", args['hash'])
+        if r.sismember("songs", song_id):
+            try:
+                info = ydl.extract_info('http://www.youtube.com/watch?v=' + args['hash'],  download=True)
+                r.sadd("songs", song_id)
+                
+                r.hset("song:%s" % song_id, "title", info['title'])
+                r.hset("song:%s" % song_id, "song_title", '')
+                r.hset("song:%s" % song_id, "artist", '')
+                r.hset("song:%s" % song_id, "yt_hash", args['hash'])
             
-            k = Key(bucket)
-            k.key = args['hash'] + '.mp3'
-            k.set_contents_from_filename(args['hash'] + '.mp3')
-            url = k.generate_url(0, query_auth=False, force_http=True)
-            os.remove(k.key)
-            r.set("song:%s:url" % song_id, url)
-            
-            ret_song = {
-            'title': info['title'],
-            'song_title': '',
-            'artist': '',
-            'yt_hash': song_id,
-            'url': url,
-            'success': True,
-            }
+                k = Key(bucket)
+                k.key = args['hash'] + '.mp3'
+                k.set_contents_from_filename(args['hash'] + '.mp3')
+                url = k.generate_url(0, query_auth=False, force_http=True)
+                os.remove(k.key)
+                r.set("song:%s:url" % song_id, url)
+                
+                ret_song = {
+                    'title': info['title'],
+                    'song_title': '',
+                    'artist': '',
+                    'yt_hash': song_id,
+                    'url': url,
+                    'success': True,
+                }
+            except:
+                print "ERROR DOWNLOADING SONG!!!"
+                ret_song = {
+                    'error': 'youtube-dl error',
+                    'yt_hash': song_id,
+                    'success': False,
+                }
+
         else:
             title = r.hget("song:%s" % song_id, "title")
             song_title = r.hget("song:%s" % song_id, "song_title")
