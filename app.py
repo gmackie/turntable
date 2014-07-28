@@ -245,13 +245,13 @@ class Queue(Resource):
             r.lpush("queue:%s" % username, song_id)
             ret = {
               'title': title,
-              'song': song_id,
+              'hash': song_id,
               'added': 1,
             }
         else:
             ret = {
               'title': title,
-              'song': song_id,
+              'hash': song_id,
               'added': 0,
               'error': 'song is not added yet.',
             }
