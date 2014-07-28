@@ -92,7 +92,7 @@ class SongList(Resource):
     def post(self):
         args = parser.parse_args()
         song_id = args['hash']
-        if r.sismember("songs", song_id):
+        if not r.sismember("songs", song_id):
             try:
                 info = ydl.extract_info('http://www.youtube.com/watch?v=' + args['hash'],  download=True)
                 r.sadd("songs", song_id)
