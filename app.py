@@ -241,15 +241,20 @@ class Queue(Resource):
         title = r.hget("song:%s" % song_id, "title")
         username = username
 
-        if r.lpush("queue:%s" % username, song_id):
+        if r.sismember("songs", song_id):
+            r.lpush("queue:%s" % username, song_id)
             ret = {
-            'title': title,
-            'song': song_id,
-            'added': 1,
+              'title': title,
+              'song': song_id,
+              'added': 1,
             }
         else:
-            abort(404, message="{'error': 'user {} already in db'}".format(username))
-        
+            ret = {
+              'title': title,
+              'song': song_id,
+              'added': 0,
+              'error': 'song is not added yet.',
+            }
         return ret, 201
 
 class Room(Resource):
