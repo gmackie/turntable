@@ -16,11 +16,11 @@ from boto.s3.key import Key
 ydl = YoutubeDL({
   'outtmpl': '%(id)s.%(ext)s',
   'format': 'bestaudio/best',
-  'verbose': 'yes'
+  'verbose': 'yes',
   })
 ydl.add_default_info_extractors()
 ydl.add_post_processor(FFmpegExtractAudioPP(preferredcodec='mp3', preferredquality='5', nopostoverwrites=False))
-
+ydl.print_debug_header()
 app = Flask(__name__)
 api = Api(app)
 
